@@ -81,6 +81,7 @@ def webhook():
             "response": int(incoming_msg)
         }
         supabase.table("MessageInfo").insert(data).execute()
+        print('data sent to supabase')
         msg = resp.message(f"You selected {int(incoming_msg)-1} people. Thank you! If you want to start over, reply 'menu'.")
     else:
         msg = resp.message("Sorry, I didn't understand that. Please reply with a number 1-4, or 'menu' to see options.")
