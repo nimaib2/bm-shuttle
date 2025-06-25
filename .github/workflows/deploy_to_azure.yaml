@@ -50,7 +50,7 @@ jobs:
         context: .
         push: true
         tags: ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-        platforms: linux/amd64 # Ensure correct architecture
+        platforms: linux/amd64 # Ensure correct architecture for builds
 
     - name: Delete existing Azure Container Instance (if it exists)
       # The "|| true" ensures the workflow doesn't fail if the ACI doesn't exist yet
