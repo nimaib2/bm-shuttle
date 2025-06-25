@@ -66,13 +66,6 @@ def webhook():
     from_number = request.values.get('From', '')
     print(f"Received message: '{incoming_msg}' from {from_number}")
 
-    data = {
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "phone_number": str(from_number[len("whatsapp:"):]),
-        "response": int(incoming_msg)
-    }
-    supabase.table("MessageInfo").insert(data).execute()
-
     resp = MessagingResponse()
 
     # Main menu
@@ -80,14 +73,15 @@ def webhook():
         msg = resp.message(
             "How many people are in your party?:\n1. 0\n2. 1\n3. 2\n4. 3\n(Enter a number 1-4)"
         )
-    elif incoming_msg in ['1']:
-        msg = resp.message("You selected 0 people. Thank you! If you want to start over, reply 'menu'.")
-    elif incoming_msg in ['2']:
-        msg = resp.message("You selected 1 people. Thank you! If you want to start over, reply 'menu'.")
-    elif incoming_msg in ['3']:
-        msg = resp.message("You selected 2 people. Thank you! If you want to start over, reply 'menu'.")
-    elif incoming_msg in ['4']:
-        msg = resp.message("You selected 3 people. Thank you! If you want to start over, reply 'menu'.")
+    elif incoming_msg in ['1', '2', '3', '4']:
+        # Only insert if it's a valid number
+        data = {
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "phone_number": str(from_number[len("whatsapp:"):]),
+            "response": int(incoming_msg)
+        }
+        supabase.table("MessageInfo").insert(data).execute()
+        msg = resp.message(f"You selected {int(incoming_msg)-1} people. Thank you! If you want to start over, reply 'menu'.")
     else:
         msg = resp.message("Sorry, I didn't understand that. Please reply with a number 1-4, or 'menu' to see options.")
 
