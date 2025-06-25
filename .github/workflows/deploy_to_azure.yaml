@@ -38,6 +38,14 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+    - name: Debug OIDC Token Subject
+      run: |
+        TOKEN=$(echo "${{ steps.azure-login.outputs.oidc_token }}" | cut -d'.' -f2 | base64 --decode)
+        echo "OIDC Token Payload:"
+        echo $TOKEN | jq .
+        echo "OIDC Token Subject (sub): $(echo $TOKEN | jq -r .sub)"
+        echo "This is the 'subject' that Azure AD is expecting in your federated credential."
+
     - name: Docker Login to Azure Container Registry
       uses: docker/login-action@v3
       with:
