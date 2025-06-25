@@ -8,7 +8,7 @@ on:
 env:
   # Azure Container Registry details
   ACR_NAME: ${{ secrets.ACR_NAME }}
-  IMAGE_NAME: nimaib/myflaskapp-amd # Your image name (part after the ACR name)
+  IMAGE_NAME: nimaib/myflaskapp-amd-062501 # Your image name (part after the ACR name)
   IMAGE_TAG: ${{ github.sha }} # Use git SHA for unique image tag
   
   # Azure Container Instance details
