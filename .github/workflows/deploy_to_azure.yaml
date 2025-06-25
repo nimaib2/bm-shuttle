@@ -24,7 +24,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production # Optional: define an environment for deployment tracking
+    environment: production # Optional: define an environment for deployment trackings
 
     steps:
     - name: Checkout code
