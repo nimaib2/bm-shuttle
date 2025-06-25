@@ -1,0 +1,92 @@
+name: Deploy Flask App to Azure Container Instance
+
+on:
+  push:
+    branches:
+      - main # Trigger on push to the main branch
+
+env:
+  # Azure Container Registry details
+  ACR_NAME: ${{ secrets.ACR_NAME }}
+  IMAGE_NAME: nimaib/myflaskapp-amd # Your image name (part after the ACR name)
+  IMAGE_TAG: ${{ github.sha }} # Use git SHA for unique image tag
+  
+  # Azure Container Instance details
+  ACI_NAME: myflaskapp-instance # Consistent name for your ACI
+  ACI_DNS_LABEL: myflaskapp-webhook # Consistent DNS label for your ACI
+  ACI_REGION: westus # Change to your preferred Azure region (e.g., westus, centralus)
+  ACI_PORT: 5000 # The port your Flask app listens on inside the container
+  
+permissions:
+  id-token: write # Required for Azure OIDC login
+  contents: read # Required to checkout code
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production # Optional: define an environment for deployment tracking
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Docker Login to Azure Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.ACR_NAME }}.azurecr.io
+        username: ${{ secrets.AZURE_CLIENT_ID }} # Using client ID for OIDC
+        password: ${{ secrets.AZURE_CLIENT_ID }} # Placeholder, OIDC handles password internally
+
+    - name: Build and Push Docker image to ACR
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        platforms: linux/amd64 # Ensure correct architecture
+
+    - name: Delete existing Azure Container Instance (if it exists)
+      # The "|| true" ensures the workflow doesn't fail if the ACI doesn't exist yet
+      run: |
+        az container delete \
+          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+          --name ${{ env.ACI_NAME }} \
+          --yes --no-wait || true
+        echo "Waiting for ACI deletion to propagate..."
+        sleep 30 # Give Azure time to process the deletion
+
+    - name: Create new Azure Container Instance
+      run: |
+        az container create \
+          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+          --name ${{ env.ACI_NAME }} \
+          --image ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+          --dns-name-label ${{ env.ACI_DNS_LABEL }} \
+          --ports ${{ env.ACI_PORT }} \
+          --cpu 1 \
+          --memory 1.5 \
+          --os-type Linux \
+          --restart-policy OnFailure \
+          --location ${{ env.ACI_REGION }} \
+          --environment-variables \
+            ACCOUNT_SID="${{ secrets.TWILIO_ACCOUNT_SID }}" \
+            AUTH_TOKEN="${{ secrets.TWILIO_AUTH_TOKEN }}" \
+            SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+            SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}"
+
+    - name: Get FQDN of the new Container Instance
+      run: |
+        FQDN=$(az container show \
+          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+          --name ${{ env.ACI_NAME }} \
+          --query 'ipAddress.fqdn' \
+          --output tsv)
+        echo "Azure Container Instance deployed. FQDN: ${FQDN}"
+        echo "You can set your Twilio webhook URL to: http://${FQDN}:${{ env.ACI_PORT }}/webhook"
