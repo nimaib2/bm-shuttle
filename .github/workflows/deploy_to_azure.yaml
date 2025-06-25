@@ -53,7 +53,7 @@ jobs:
         platforms: linux/amd64 # Ensure correct architecture for builds
 
     - name: Delete existing Azure Container Instance (if it exists)
-      # The "|| true" ensures the workflow doesn't fail if the ACI doesn't exist yet
+      # The "|| true" ensures the workflow doesn't fail if the ACI doesn't exist yett
       run: |
         az container delete \
           --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
