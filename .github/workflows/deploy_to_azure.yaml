@@ -10,6 +10,8 @@ env:
   ACR_NAME: ${{ secrets.ACR_NAME }}
   IMAGE_NAME: nimaib/myflaskapp-amd-062501 # Your image name (part after the ACR name)
   IMAGE_TAG: ${{ github.sha }} # Use git SHA for unique image tag
+  ACTIONS_STEP_DEBUG: true # Add this line for debugging
+  ACTIONS_RUNNER_DEBUG: true
   
   # Azure Container Instance details
   ACI_NAME: myflaskapp-instance # Consistent name for your ACI
@@ -40,7 +42,7 @@ jobs:
 
     - name: Debug OIDC Token Subject
       run: |
-        echo "Raw OIDC Token: ${{ steps.azure-login.outputs.oidc_token }}"
+        echo "Raw OIDC Token: ${{ steps.azure-login.outputs.access_token }}"
         TOKEN=$(echo "${{ steps.azure-login.outputs.oidc_token }}" | cut -d'.' -f2 | base64 --decode)
         echo "OIDC Token Payload:"
         echo $TOKEN | jq .
