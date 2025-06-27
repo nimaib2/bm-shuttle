@@ -1,0 +1,342 @@
+openapi: 3.0.0
+info:
+  title: Supabase Polling API
+  version: 1.0.0
+
+servers:
+  - url: https://yrqmrdfwqiihwlecisco.supabase.co/rest/v1
+    description: Supabase REST endpoint
+
+paths:
+  /User:
+    get:
+      summary: Get all users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User created
+    put:
+      summary: Update an existing user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the user to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User updated successfully
+        '404':
+          description: User not found
+    delete:
+      summary: Delete users (by query filter)
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: User deleted
+
+  /Poll:
+    get:
+      summary: Get all polls
+      responses:
+        '200':
+          description: List of polls
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Poll'
+    post:
+      summary: Create a new poll
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Poll'
+      responses:
+        '201':
+          description: Poll created
+    put:
+      summary: Update an existing poll
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the poll to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Poll'
+      responses:
+        '200':
+          description: Poll updated successfully
+        '404':
+          description: Poll not found
+    delete:
+      summary: Delete polls (by query filter)
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Poll deleted
+
+  /PollResponses:
+    get:
+      summary: Get all poll responses
+      responses:
+        '200':
+          description: List of responses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PollResponse'
+    post:
+      summary: Submit a poll response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PollResponse'
+      responses:
+        '201':
+          description: Poll response created
+    put:
+      summary: Update an existing poll response
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the poll response to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PollResponse'
+      responses:
+        '200':
+          description: Poll response updated successfully
+        '404':
+          description: Poll response not found
+    delete:
+      summary: Delete poll responses (by query filter)
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Poll response deleted
+
+  /PollSeries:
+    get:
+      summary: Get all poll series
+      responses:
+        '200':
+          description: List of poll series
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PollSeries'
+    post:
+      summary: Create a new poll series
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PollSeries'
+      responses:
+        '201':
+          description: Poll series created
+    put:
+      summary: Update an existing poll series
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the poll series to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PollSeries'
+      responses:
+        '200':
+          description: Poll series updated successfully
+        '404':
+          description: Poll series not found
+    delete:
+      summary: Delete poll series (by query filter)
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Poll series deleted
+
+  /Group:
+    get:
+      summary: Get all groups
+      responses:
+        '200':
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+    post:
+      summary: Create a new group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        '201':
+          description: Group created
+    put:
+      summary: Update an existing group
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the group to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        '200':
+          description: Group updated successfully
+        '404':
+          description: Group not found
+    delete:
+      summary: Delete groups (by query filter)
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Group deleted
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        Id:
+          type: integer
+        GroupId:
+          type: integer
+        Name:
+          type: string
+        Phone Number:
+          type: string
+        Role:
+          type: string
+
+    Poll:
+      type: object
+      properties:
+        Id:
+          type: integer
+        SeriesId:
+          type: integer
+        Question:
+          type: string
+        Open Date:
+          type: string
+          format: date
+        Close Date:
+          type: string
+          format: date
+
+    PollResponse:
+      type: object
+      properties:
+        Id:
+          type: integer
+        UserId:
+          type: integer
+        PollId:
+          type: integer
+        Response:
+          type: string
+        Submission Date:
+          type: string
+          format: date
+
+    PollSeries:
+      type: object
+      properties:
+        Id:
+          type: integer
+        Series Name:
+          type: string
+
+    Group:
+      type: object
+      properties:
+        Id:
+          type: integer
+        Name:
+          type: string
