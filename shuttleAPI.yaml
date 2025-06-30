@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Supabase Polling API
+  title: Shuttle API
   version: 1.0.0
 
 servers:
@@ -306,9 +306,13 @@ components:
         Open Date:
           type: string
           format: date
-        Close Date:
+        GroupId:
+          type: integer
+        Event Date:
           type: string
           format: date
+        Reservation Offset:
+          type: integer
 
     PollResponse:
       type: object
@@ -330,8 +334,20 @@ components:
       properties:
         Id:
           type: integer
-        Series Name:
+        Start Date:
           type: string
+          format: date
+        End Date:
+          type: string
+          format: date
+        Title:
+          type: string
+        GroupId:
+          type: integer
+        Frequency:
+          type: string
+        PlayOffset:
+          type: integer
 
     Group:
       type: object
