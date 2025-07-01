@@ -16,7 +16,7 @@ AZURE_APP_NAME="github-actions-myflaskapp" # The display name for your AAD app. 
 
 # Your GitHub username/organization and repository name
 YOUR_GITHUB_OWNER="nimaib2" # Your GitHub username if not an organization
-YOUR_REPO_NAME="badgemane-shuttle"
+YOUR_REPO_NAME="bm-shuttle"
 GITHUB_ENVIRONMENT_NAME="production" # Must match 'environment: production' in your workflow YAML
 
 echo "Using Subscription ID: $AZURE_SUBSCRIPTION_ID"
