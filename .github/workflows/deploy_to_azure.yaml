@@ -93,7 +93,8 @@ jobs:
             ACCOUNT_SID="${{ secrets.TWILIO_ACCOUNT_SID }}" \
             AUTH_TOKEN="${{ secrets.TWILIO_AUTH_TOKEN }}" \
             SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
-            SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}"
+            SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
+            APPLICATIONINSIGHTS_CONNECTION_STRING="${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}"
 
     - name: Get FQDN of the new Container Instance
       run: |
