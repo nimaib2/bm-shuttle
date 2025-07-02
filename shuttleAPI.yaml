@@ -8,7 +8,7 @@ servers:
     description: Supabase REST endpoint
 
 paths:
-  /User:
+  /users:
     get:
       summary: Get all users
       responses:
@@ -42,7 +42,7 @@ paths:
         '204':
           description: User deleted
 
-  /Membership:
+  /memberships:
     get:
       summary: Get all memberships
       responses:
@@ -76,7 +76,7 @@ paths:
         '204':
           description: Membership deleted
 
-  /Poll:
+  /polls:
     get:
       summary: Get all polls
       responses:
@@ -110,7 +110,7 @@ paths:
         '204':
           description: Poll deleted
 
-  /PollResponse:
+  /poll-responses:
     get:
       summary: Get all poll responses
       responses:
@@ -144,7 +144,7 @@ paths:
         '204':
           description: Poll response deleted
 
-  /PollSeries:
+  /poll-series:
     get:
       summary: Get all poll series
       responses:
@@ -178,7 +178,7 @@ paths:
         '204':
           description: Poll series deleted
 
-  /Group:
+  /groups:
     get:
       summary: Get all groups
       responses:
@@ -217,11 +217,11 @@ components:
     User:
       type: object
       properties:
-        Id:
+        id:
           type: integer
-        Name:
+        name:
           type: string
-        Phone Number:
+        phone_number:
           type: string
 
     Membership:
@@ -229,72 +229,72 @@ components:
       properties:
         id:
           type: integer
-        GroupId:
+        group_id:
           type: integer
-        UserId:
+        user_id:
           type: integer
-        Role:
+        role:
           type: string
 
     Poll:
       type: object
       properties:
-        Id:
+        id:
           type: integer
-        pollSeriesId:
+        poll_series_id:
           type: integer
-        Open Date:
+        open_date:
           type: string
           format: date
-        GroupId:
+        group_id:
           type: integer
-        Event Date:
+        event_date:
           type: string
           format: date
-        ReservationOffset:
+        reservation_offset:
           type: integer
 
     PollResponse:
       type: object
       properties:
-        Id:
+        id:
           type: integer
-        UserId:
+        user_id:
           type: integer
-        PollId:
+        poll_id:
           type: integer
-        Response:
+        response:
           type: string
-        Submission Date:
+        submission_date:
           type: string
           format: date
 
     PollSeries:
       type: object
       properties:
-        Id:
+        id:
           type: integer
-        Start Date:
+        start_date:
           type: string
           format: date
-        End Date:
+        end_date:
           type: string
           format: date
-        Title:
+        title:
           type: string
-        GroupId:
+        group_id:
           type: integer
-        Frequency:
+        frequency:
           type: string
-        PlayOffset:
+        play_offset:
           type: integer
-        ReservationOffset:
+        reservation_offset:
           type: integer
 
     Group:
       type: object
       properties:
-        Id:
+        id:
           type: integer
-        Name:
+        name:
           type: string

@@ -45,6 +45,7 @@ trace.set_tracer_provider(provider)
 
 # Configure Exporter to use Azure Monitor exporter
 # It will automatically pick up APPLICATIONINSIGHTS_CONNECTION_STRING from env
+# Uncomment and fix later
 options = ExporterOptions(connection_string=os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"))
 otlp_exporter = AzureMonitorTraceExporter(options=options)
 span_processor = BatchSpanProcessor(otlp_exporter)
@@ -91,7 +92,12 @@ if datetime.now(timezone.utc)>END_DATE:
 def webhook():
     incoming_msg = request.values.get('Body', '').strip()
     from_number = request.values.get('From', '')
+    # Check for context.messageId for replies to interactive messages
+    replied_message_id = request.values.get('context.messageId', None)
+
     print(f"Received message: '{incoming_msg}' from {from_number}")
+    if replied_message_id:
+        print(f"Message replied to: {replied_message_id}")
 
     resp = MessagingResponse()
 
@@ -102,13 +108,13 @@ def webhook():
         )
     elif incoming_msg in ['1', '2', '3', '4']:
         # Only insert if it's a valid number
-        data = {
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "phone_number": str(from_number[len("whatsapp:"):]),
-            "response": int(incoming_msg)
-        }
-        supabase.table("MessageInfo").insert(data).execute()
-        print('data sent to supabase')
+        # data = {
+        #     "created_at": datetime.now(timezone.utc).isoformat(),
+        #     "phone_number": str(from_number[len("whatsapp:"):]),
+        #     "response": int(incoming_msg)
+        # }
+        # supabase.table("MessageInfo").insert(data).execute()
+        # print('data sent to supabase')
         msg = resp.message(f"You selected {int(incoming_msg)-1} people. Thank you! If you want to start over, reply 'menu'.")
     else:
         msg = resp.message("Sorry, I didn't understand that. Please reply with a number 1-4, or 'menu' to see options.")
