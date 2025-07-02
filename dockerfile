@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
     python3-dev \
+    libffi-dev \
+    libssl-dev \
     # Add any other system dependencies needed by your Python packages here
     # e.g., libffi-dev for cryptography if not covered by build-essential
     && rm -rf /var/lib/apt/lists/* 
