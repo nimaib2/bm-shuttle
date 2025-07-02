@@ -12,7 +12,10 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from azure.monitor.opentelemetry.configure import configure_azure_monitor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.azuremonitor.options import ExporterOptions
+from opentelemetry.exporter.azuremonitor.trace_exporter import AzureMonitorTraceExporter
+# from azure.monitor.opentelemetry.configure import configure_azure_monitor # Commented out: No longer using distro
 
 load_dotenv()
 # print("SUPABASE_URL:", os.getenv('SUPABASE_URL'))
@@ -34,10 +37,19 @@ supabase: SupabaseClient = create_client(supabase_url, supabase_key)
 
 END_DATE = datetime(2025, 6, 30, tzinfo=timezone.utc)
 
-# Configure OpenTelemetry using the Azure Monitor Distro
-# This replaces the manual resource, provider, and exporter setup.
-# It automatically picks up APPLICATIONINSIGHTS_CONNECTION_STRING from env.
-configure_azure_monitor(enable_live_metrics=True, service_name="badge-mane-webhook")
+# Configure Resource (optional, but good practice)
+resource = Resource.create({"service.name": "badge-mane-webhook"})
+
+# Configure TracerProvider
+provider = TracerProvider(resource=resource)
+trace.set_tracer_provider(provider)
+
+# Configure Exporter to use Azure Monitor exporter
+# It will automatically pick up APPLICATIONINSIGHTS_CONNECTION_STRING from env
+options = ExporterOptions(connection_string=os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"))
+otlp_exporter = AzureMonitorTraceExporter(options=options)
+span_processor = BatchSpanProcessor(otlp_exporter)
+provider.add_span_processor(span_processor)
 
 # Instrument Flask and Requests
 FlaskInstrumentor().instrument_app(app) # 'app' is your Flask app instance
