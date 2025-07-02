@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* 
     # Clean up apt cache to keep image small
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt -v --no-cache-dir
 
 # Copy project files
 COPY . /app/
