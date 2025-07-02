@@ -42,10 +42,8 @@ jobs:
 
     - name: Debug OIDC Token Subject
       run: |
-        echo "Raw OIDC Token (ID Token): ${{ steps.azure-login.outputs.id_token }}"
-        # The 'id_token' is the OIDC token that contains the subject claim.
-        # The 'access_token' is for accessing Azure resources, not for the subject claim.
-        TOKEN=$(echo "${{ steps.azure-login.outputs.id_token }}" | cut -d'.' -f2 | base64 --decode)
+        echo "Raw OIDC Token: ${{ steps.azure-login.outputs.access_token }}"
+        TOKEN=$(echo "${{ steps.azure-login.outputs.oidc_token }}" | cut -d'.' -f2 | base64 --decode)
         echo "OIDC Token Payload:"
         echo $TOKEN | jq .
         echo "OIDC Token Subject (sub): $(echo $TOKEN | jq -r .sub)"
@@ -55,7 +53,7 @@ jobs:
       uses: docker/login-action@v3
       with:
         registry: ${{ env.ACR_NAME }}.azurecr.io
-        username: ${{ secrets.AZURE_CLIENT_ID }}
+        username: 636ecdd3-2910-4376-94af-f663003fdecf
         password: ${{ secrets.AZURE_PW }}
 
     - name: Build and Push Docker image to ACR
@@ -91,13 +89,13 @@ jobs:
           --restart-policy OnFailure \
           --location ${{ env.ACI_REGION }} \
           --registry-username ${{ secrets.AZURE_CLIENT_ID }} \
-          --registry-password ${{ secrets.AZURE_PW }}
+          --registry-password ${{ secrets.AZURE_PW }} \
           --environment-variables \
             ACCOUNT_SID="${{ secrets.TWILIO_ACCOUNT_SID }}" \
             AUTH_TOKEN="${{ secrets.TWILIO_AUTH_TOKEN }}" \
             SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
             SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
-            APPLICATIONINSIGHTS_CONNECTION_STRING="${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}"
+            APPLICATIONINSIGHTS_CONNECTION_STRING="${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}" 
 
     - name: Get FQDN of the new Container Instance
       run: |
