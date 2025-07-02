@@ -56,7 +56,7 @@ jobs:
       with:
         registry: ${{ env.ACR_NAME }}.azurecr.io
         username: ${{ secrets.AZURE_CLIENT_ID }}
-        password: ${{ steps.azure-login.outputs.access_token }}
+        password: ${{ secrets.AZURE_PW }}
 
     - name: Build and Push Docker image to ACR
       uses: docker/build-push-action@v5
@@ -91,7 +91,7 @@ jobs:
           --restart-policy OnFailure \
           --location ${{ env.ACI_REGION }} \
           --registry-username ${{ secrets.AZURE_CLIENT_ID }} \
-          --registry-password ${{ steps.azure-login.outputs.access_token }} \
+          --registry-password ${{ secrets.AZURE_PW }}
           --environment-variables \
             ACCOUNT_SID="${{ secrets.TWILIO_ACCOUNT_SID }}" \
             AUTH_TOKEN="${{ secrets.TWILIO_AUTH_TOKEN }}" \
