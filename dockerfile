@@ -17,7 +17,8 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     # Add any other system dependencies needed by your Python packages here
     # e.g., libffi-dev for cryptography if not covered by build-essential
-    # && rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small (optional but recommended)
+    && rm -rf /var/lib/apt/lists/* 
+    # Clean up apt cache to keep image small
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
