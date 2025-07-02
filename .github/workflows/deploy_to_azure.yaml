@@ -89,7 +89,7 @@ jobs:
           --restart-policy OnFailure \
           --location ${{ env.ACI_REGION }} \
           --registry-username ${{ secrets.AZURE_CLIENT_ID }} \
-          --registry-password ${{ secrets.AZURE_PW }} \
+          --registry-password ${{ steps.azure-login.outputs.access_token }} \
           --environment-variables \
             ACCOUNT_SID="${{ secrets.TWILIO_ACCOUNT_SID }}" \
             AUTH_TOKEN="${{ secrets.TWILIO_AUTH_TOKEN }}" \
