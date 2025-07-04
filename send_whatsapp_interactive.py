@@ -20,12 +20,11 @@ numbers = [
 def send_text_with_options():
     for number in numbers:
         try:
-            message = client.messages.create(
+            client.messages.create(
                 from_='whatsapp:+14155238886',
-                to='whatsapp:' + number,
-                body="How many people are in your party? Select a number 0-3"
+                to='whatsapp:+14252463728',
+                content_sid='HXae9b8723945109e491519a77de8d46d3'
             )
-            print(f"Text message sent: {message.sid}")
         except Exception as e:
             print(f"Failed to send message to {number}: {e}")
 
