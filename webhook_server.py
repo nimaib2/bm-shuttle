@@ -285,8 +285,8 @@ def live_metrics():
     with tracer.start_as_current_span("live_metrics_endpoint") as span:
         import psutil
         
-        # Get comprehensive system metrics
-        cpu_percent = psutil.cpu_percent(interval=1)
+        # Get comprehensive system metrics (removed interval=1 to prevent hanging)
+        cpu_percent = psutil.cpu_percent()
         memory = psutil.virtual_memory()
         disk = psutil.disk_usage('/')
         
