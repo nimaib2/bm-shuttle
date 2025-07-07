@@ -47,40 +47,51 @@ trace.set_tracer_provider(provider)
 connection_string = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
 if connection_string:
     print(f"Configuring Azure Monitor with connection string: {connection_string[:50]}...")
-    azure_exporter = AzureMonitorTraceExporter(connection_string=connection_string)
-    span_processor = BatchSpanProcessor(azure_exporter)
-    provider.add_span_processor(span_processor)
-    print("Azure Monitor OpenTelemetry exporter configured successfully")
     
-    # Custom Live Metrics implementation
-    def send_live_metrics():
-        """Send periodic live metrics to Application Insights"""
-        tracer = trace.get_tracer(__name__)
-        with tracer.start_as_current_span("live_metrics_heartbeat") as span:
-            import psutil
-            
-            # Get system metrics
-            cpu_percent = psutil.cpu_percent()
-            memory = psutil.virtual_memory()
-            
-            # Add live metrics attributes
-            span.set_attribute("live_metrics.cpu_percent", cpu_percent)
-            span.set_attribute("live_metrics.memory_percent", memory.percent)
-            span.set_attribute("live_metrics.memory_available_mb", memory.available / 1024 / 1024)
-            span.set_attribute("live_metrics.timestamp", datetime.now(timezone.utc).isoformat())
-            span.set_attribute("live_metrics.service_status", "running")
-            
-            print(f"Live metrics sent - CPU: {cpu_percent}%, Memory: {memory.percent}%")
-    
-    # Schedule live metrics every 30 seconds
-    scheduler.add_job(
-        id='live_metrics_job',
-        func=send_live_metrics,
-        trigger='interval',
-        seconds=30
-    )
-    print("Live Metrics scheduled to run every 30 seconds")
-    
+    try:
+        # Use the simpler exporter approach for faster startup
+        azure_exporter = AzureMonitorTraceExporter(connection_string=connection_string)
+        span_processor = BatchSpanProcessor(azure_exporter)
+        provider.add_span_processor(span_processor)
+        print("Azure Monitor OpenTelemetry exporter configured successfully")
+        
+        # Custom Live Metrics implementation (simpler and faster)
+        def send_live_metrics():
+            """Send periodic live metrics to Application Insights"""
+            try:
+                tracer = trace.get_tracer(__name__)
+                with tracer.start_as_current_span("live_metrics_heartbeat") as span:
+                    import psutil
+                    
+                    # Get system metrics
+                    cpu_percent = psutil.cpu_percent()
+                    memory = psutil.virtual_memory()
+                    
+                    # Add live metrics attributes
+                    span.set_attribute("live_metrics.cpu_percent", cpu_percent)
+                    span.set_attribute("live_metrics.memory_percent", memory.percent)
+                    span.set_attribute("live_metrics.memory_available_mb", memory.available / 1024 / 1024)
+                    span.set_attribute("live_metrics.timestamp", datetime.now(timezone.utc).isoformat())
+                    span.set_attribute("live_metrics.service_status", "running")
+                    
+                    print(f"Live metrics sent - CPU: {cpu_percent}%, Memory: {memory.percent}%")
+            except Exception as e:
+                print(f"Live metrics error: {e}")
+        
+        # Schedule live metrics every 60 seconds (less frequent to reduce load)
+        scheduler.add_job(
+            id='live_metrics_job',
+            func=send_live_metrics,
+            trigger='interval',
+            seconds=60,
+            max_instances=1  # Prevent overlapping executions
+        )
+        print("Live Metrics scheduled to run every 60 seconds")
+        
+    except Exception as e:
+        print(f"OpenTelemetry setup failed: {e}")
+        print("Continuing without telemetry...")
+        
 else:
     print("Warning: APPLICATIONINSIGHTS_CONNECTION_STRING not found. Telemetry will not be sent to Azure Monitor.")
 
@@ -130,36 +141,56 @@ def send_scheduled_message():
             raise
 
 # Schedule a one-off job (runs 3 minutes from now)
-run_time = datetime.now() + timedelta(minutes=3)
-scheduler.add_job(
-    id='one_time_job',
-    func=send_scheduled_message,
-    trigger='date',
-    run_date=run_time
-)
-# scheduler.remove_job('one_time_job')  # Commented out so the job can actually run
-print('One-time job scheduled for:', run_time)
+try:
+    run_time = datetime.now() + timedelta(minutes=3)
+    scheduler.add_job(
+        id='one_time_job',
+        func=send_scheduled_message,
+        trigger='date',
+        run_date=run_time,
+        max_instances=1
+    )
+    # scheduler.remove_job('one_time_job')  # Commented out so the job can actually run
+    print('One-time job scheduled for:', run_time)
+except Exception as e:
+    print(f"Failed to schedule one-time job: {e}")
 
 # Schedule a recurring job (every hour at minute 5)
-scheduler.add_job(
-    id='hourly_job',
-    func=send_scheduled_message,
-    trigger='cron',
-    minute=5
-)
+try:
+    scheduler.add_job(
+        id='hourly_job',
+        func=send_scheduled_message,
+        trigger='cron',
+        minute=5,
+        max_instances=1
+    )
+    print("Hourly job scheduled successfully")
+except Exception as e:
+    print(f"Failed to schedule hourly job: {e}")
 
 # Add a test job that runs every 5 minutes for testing (remove this in production)
-scheduler.add_job(
-    id='test_job_every_5_min',
-    func=send_scheduled_message,
-    trigger='cron',
-    minute='*/5'  # Every 5 minutes
-)
-print('Test job scheduled to run every 5 minutes')
+try:
+    scheduler.add_job(
+        id='test_job_every_5_min',
+        func=send_scheduled_message,
+        trigger='cron',
+        minute='*/5',  # Every 5 minutes
+        max_instances=1
+    )
+    print('Test job scheduled to run every 5 minutes')
+except Exception as e:
+    print(f"Failed to schedule test job: {e}")
 
-if datetime.now(timezone.utc)>END_DATE:
-    scheduler.remove_job('hourly_job')
-    scheduler.remove_job('test_job_every_5_min')
+# Clean up expired jobs
+try:
+    if datetime.now(timezone.utc) > END_DATE:
+        if scheduler.get_job('hourly_job'):
+            scheduler.remove_job('hourly_job')
+        if scheduler.get_job('test_job_every_5_min'):
+            scheduler.remove_job('test_job_every_5_min')
+        print("Expired jobs removed")
+except Exception as e:
+    print(f"Error cleaning up jobs: {e}")
 
 @app.route('/webhook', methods=['POST'])
 def webhook():

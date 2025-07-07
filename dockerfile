@@ -31,4 +31,4 @@ COPY . /app/
 EXPOSE 5000
 
 # Run the application with gunicorn
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "webhook_server:app"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "webhook_server:app"]
